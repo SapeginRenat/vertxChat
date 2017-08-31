@@ -41,6 +41,7 @@ public class VerticleLoader {
         VertxOptions options = new VertxOptions().setClustered(false);
         //path to the verticle-class.
         String dir = "vertxChat/src/main/java/pro/sapegin/vertxchat/";
+        //String dir = "chat/src/main/java/";
 
         try {
             File current = new File(".").getCanonicalFile();

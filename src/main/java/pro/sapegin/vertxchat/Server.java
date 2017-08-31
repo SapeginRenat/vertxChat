@@ -23,7 +23,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.vertx.ext.web.handler.sockjs.BridgeEventType.*;
+import static io.vertx.ext.web.handler.sockjs.BridgeEvent.Type.*;
+
 
 
 
@@ -32,10 +33,10 @@ public class Server extends AbstractVerticle {
     private Logger log = LoggerFactory.getLogger(Server.class);
     private SockJSHandler handler = null;
     private AtomicInteger online = new AtomicInteger(0);
-    private int freePort;
+
 
     @Override
-    public void start() throws Exception {
+    public void start() {
         if (!deploy()) {
             log.error("Failed to deploy the server.");
             return;
@@ -53,6 +54,7 @@ public class Server extends AbstractVerticle {
         Router router = Router.router(vertx);
 
         handler = SockJSHandler.create(vertx);
+
         router.route("/eventbus/*").handler(handler);
         router.route().handler(StaticHandler.create());
 
@@ -125,6 +127,7 @@ public class Server extends AbstractVerticle {
         handler.bridge(opts, event -> {
             if(event.type() == PUBLISH)
                 publishEvent(event);
+
             if (event.type() == REGISTER)
                 registerEvent(event);
 
@@ -143,9 +146,9 @@ public class Server extends AbstractVerticle {
      * @return result of the publication.
      */
     private boolean publishEvent(BridgeEvent event) {
-        if (event.getRawMessage() != null
-                && event.getRawMessage().getString("address").equals("chat.to.server")) {
-            String message = event.getRawMessage().getString("body");
+        if (event.rawMessage() != null
+                && event.rawMessage().getString("address").equals("chat.to.server")) {
+            String message = event.rawMessage().getString("body");
             if (!verifyMessage(message))
                 return false;
 
@@ -187,8 +190,8 @@ public class Server extends AbstractVerticle {
      * @param event contains of the address.
      */
     private void registerEvent(BridgeEvent event) {
-        if (event.getRawMessage() != null
-                && event.getRawMessage().getString("address").equals("chat.to.client"))
+        if (event.rawMessage() != null
+                && event.rawMessage().getString("address").equals("chat.to.client"))
             new Thread(() ->
             {
                 Map<String, Object> registerNotice = createRegisterNotice();
